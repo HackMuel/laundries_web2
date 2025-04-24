@@ -1,0 +1,16 @@
+{
+  "name": "laundries",
+  "version": "1.0.0",
+  "description": "Modern laundry management system",
+  "scripts": {
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm run start:dev",
+    "dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "build": "cd frontend && npm run build && cd ../backend && npm run build",
+    "start:prod": "cd backend && npm run start:prod"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
