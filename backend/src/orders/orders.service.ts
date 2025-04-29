@@ -21,6 +21,9 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
+    // Log the incoming DTO for debugging
+    console.log('Create Order DTO:', JSON.stringify(createOrderDto, null, 2));
+
     const customer = await this.customersService.findOne(createOrderDto.customerId);
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${createOrderDto.customerId} not found`);
@@ -41,10 +44,12 @@ export class OrdersService {
     // Save order first to get its ID
     const savedOrder = await this.ordersRepository.save(order);
 
+    // Log the saved order for debugging
+    console.log('Saved Order:', JSON.stringify(savedOrder, null, 2));
+
     // Process order items
     let total = 0;
     if (createOrderDto.items && createOrderDto.items.length > 0) {
-      // Save items one by one to ensure orderId is set
       for (const item of createOrderDto.items) {
         const service = await this.servicesService.findOne(item.serviceId);
         if (!service) {
@@ -55,16 +60,14 @@ export class OrdersService {
         const itemTotal = price * item.quantity;
         total += itemTotal;
 
-        // Create and immediately save each item
-        const orderItem = this.orderItemsRepository.create({
-          orderId: savedOrder.id, // Explicitly set the orderId
+        // Save directly instead of creating and then saving
+        await this.orderItemsRepository.save({
+          orderId: savedOrder.id, // Make sure we use the ID from the saved order
           serviceId: item.serviceId,
           quantity: item.quantity,
           price,
           total: itemTotal,
         });
-
-        await this.orderItemsRepository.save(orderItem);
       }
     }
 
@@ -105,12 +108,15 @@ export class OrdersService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
+    console.log(`Updating order ${id} with data:`, JSON.stringify(updateOrderDto, null, 2));
+    
+    // First find the order to ensure it exists
     const order = await this.findOne(id);
-
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
+    // Update basic order fields
     if (updateOrderDto.status !== undefined) order.status = updateOrderDto.status;
     if (updateOrderDto.note !== undefined) order.note = updateOrderDto.note;
     if (updateOrderDto.customerId !== undefined) order.customerId = updateOrderDto.customerId;
@@ -122,42 +128,69 @@ export class OrdersService {
       order.paidAt = new Date();
     }
 
-    // Fix for handling order items - ensure orderId is set
+    // Save order first to ensure we have the ID
+    const savedOrder = await this.ordersRepository.save(order);
+
+    // Handle order items if provided
     if (updateOrderDto.items && updateOrderDto.items.length > 0) {
-      // First, remove existing items
-      await this.orderItemsRepository.delete({ orderId: id });
-
-      // Calculate new total
-      let total = 0;
-
-      // Create and save items one by one to ensure orderId is set
-      for (const item of updateOrderDto.items) {
-        const service = await this.servicesService.findOne(item.serviceId);
-        if (!service) {
-          throw new NotFoundException(`Service with ID ${item.serviceId} not found`);
+      try {
+        console.log(`Removing existing items for order ${id}`);
+        // First delete existing items using a direct query to ensure clean slate
+        await this.orderItemsRepository.createQueryBuilder()
+          .delete()
+          .where("orderId = :orderId", { orderId: id })
+          .execute();
+          
+        console.log(`Adding ${updateOrderDto.items.length} new items`);
+        
+        // Calculate new total
+        let total = 0;
+        
+        // Create and insert new items directly using query builder
+        for (const item of updateOrderDto.items) {
+          const service = await this.servicesService.findOne(item.serviceId);
+          if (!service) {
+            throw new NotFoundException(`Service with ID ${item.serviceId} not found`);
+          }
+          
+          const price = service.price;
+          const itemTotal = price * item.quantity;
+          total += itemTotal;
+          
+          // Insert using direct query builder to avoid entity issues
+          await this.orderItemsRepository.createQueryBuilder()
+            .insert()
+            .into('order_items')
+            .values({
+              id: this.generateUUID(),
+              orderId: id,
+              serviceId: item.serviceId,
+              quantity: item.quantity,
+              price: price,
+              total: itemTotal
+            })
+            .execute();
+            
+          console.log(`Added item for service ${item.serviceId}`);
         }
-
-        const price = service.price;
-        const itemTotal = price * item.quantity;
-        total += itemTotal;
-
-        // Create and immediately save each item with explicit orderId
-        const orderItem = this.orderItemsRepository.create({
-          orderId: id,
-          serviceId: item.serviceId,
-          quantity: item.quantity,
-          price,
-          total: itemTotal,
-        });
-
-        await this.orderItemsRepository.save(orderItem);
+        
+        // Update the total amount
+        console.log(`Setting total amount to ${total}`);
+        await this.ordersRepository
+          .createQueryBuilder()
+          .update()
+          .set({ totalAmount: total })
+          .where("id = :id", { id })
+          .execute();
+          
+      } catch (error) {
+        console.error('Error processing order items:', error);
+        throw error;
       }
-
-      // Update order total
-      order.totalAmount = total;
     }
 
-    return this.ordersRepository.save(order);
+    // Return the updated order with refreshed data
+    return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
@@ -219,5 +252,14 @@ export class OrdersService {
     }
 
     return { labels, revenue, orders };
+  }
+
+  // Add this helper method to generate UUIDs
+  private generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0,
+          v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 }

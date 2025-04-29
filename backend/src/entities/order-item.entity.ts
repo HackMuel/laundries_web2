@@ -7,25 +7,25 @@ export class OrderItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Order, order => order.items, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  order: Order;
-
-  @Column()
+  @Column({ nullable: false })
   orderId: string;
 
-  @ManyToOne(() => Service)
-  @JoinColumn()
-  service: Service;
+  @ManyToOne(() => Order, order => order.items, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
 
-  @Column()
+  @Column({ nullable: false })
   serviceId: string;
 
-  @Column()
-  quantity: number;
+  @ManyToOne(() => Service)
+  @JoinColumn({ name: 'serviceId' })
+  service: Service;
 
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
+
+  @Column()
+  quantity: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
   total: number;

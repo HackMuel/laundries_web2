@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, InternalServerErrorException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -26,8 +26,18 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(id, updateOrderDto);
+  async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+    try {
+      console.log(`Received update request for order ${id}`);
+      return await this.ordersService.update(id, updateOrderDto);
+    } catch (error) {
+      console.error(`Error updating order ${id}:`, error);
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(`Failed to update order: ${error.message}`);
+      } else {
+        throw new InternalServerErrorException('Failed to update order due to an unknown error');
+      }
+    }
   }
 
   @Delete(':id')

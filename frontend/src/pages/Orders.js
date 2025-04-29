@@ -254,16 +254,29 @@ const Orders = () => {
     setFormError('');
     
     try {
+      // Log the data being sent to API
+      console.log('Sending order data:', JSON.stringify(formData, null, 2));
+      
       if (dialogMode === 'create') {
-        await api.post('/orders', formData);
+        const response = await api.post('/orders', formData);
+        console.log('Order created response:', response.data);
       } else {
-        await api.patch(`/orders/${selectedOrder.id}`, formData);
+        const response = await api.patch(`/orders/${selectedOrder.id}`, formData);
+        console.log('Order updated response:', response.data);
       }
       
       handleCloseDialog();
       fetchOrders(statusFilter);
     } catch (err) {
       console.error('Error submitting form:', err);
+      console.error('Error response data:', err.response?.data);
+      console.error('Error response status:', err.response?.status);
+      
+      // Try to extract more details if available
+      if (err.response?.data?.error) {
+        console.error('Detailed error:', err.response.data.error);
+      }
+      
       setFormError(err.response?.data?.message || 'An error occurred. Please try again.');
     } finally {
       setFormSubmitting(false);
