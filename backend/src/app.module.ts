@@ -16,19 +16,15 @@ import { DashboardModule } from './dashboard/dashboard.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-  imports: [ConfigModule],
-  useFactory: (configService: ConfigService) => ({
-    type: 'postgres',
-    url: configService.get('DATABASE_URL'),
-    ssl:
-      configService.get('NODE_ENV') === 'production'
-        ? { rejectUnauthorized: true } // <-- WAJIB untuk Railway/Neon
-        : false,                       // <-- Nonaktif untuk Postgres.app lokal
-    autoLoadEntities: true,
-    synchronize: true, // Catatan: Sebaiknya 'false' di produksi tahap lanjut
-  }),
-  inject: [ConfigService],
-}),
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get('DATABASE_URL'),
+        autoLoadEntities: true,
+        synchronize: true, // Catatan: Sebaiknya 'false' di produksi tahap lanjut
+      }),
+      inject: [ConfigService],
+    }),
     UsersModule,
     AuthModule,
     CustomersModule,
