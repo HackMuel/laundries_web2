@@ -20,6 +20,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
+        ssl: {
+          rejectUnauthorized: false,
+        },
         autoLoadEntities: true,
         synchronize: true, // Catatan: Sebaiknya 'false' di produksi tahap lanjut
       }),
