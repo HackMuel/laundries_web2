@@ -30,7 +30,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import api from '../utils/api';
+import api from '../api'
 import { Service } from '../types';
 
 interface FormData {

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import api from '../utils/axios';
+import api from '../api'
 
 const AuthContext = createContext(null);
 
@@ -14,13 +14,13 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
       api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
-    
+
     setLoading(false);
   }, []);
 
@@ -29,18 +29,18 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { accessToken, user } = response.data;
-      
+
       // Set token in axios headers
       api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      
+
       // Save in localStorage
       localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       // Update state
       setToken(accessToken);
       setUser(user);
-      
+
       return { success: true };
     } catch (error) {
       return {
@@ -55,18 +55,18 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/register', userData);
       const { accessToken, user } = response.data;
-      
+
       // Set token in axios headers
       api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      
+
       // Save in localStorage
       localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       // Update state
       setToken(accessToken);
       setUser(user);
-      
+
       return { success: true };
     } catch (error) {
       return {
@@ -81,11 +81,11 @@ export const AuthProvider = ({ children }) => {
     // Remove from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
+
     // Reset state
     setToken(null);
     setUser(null);
-    
+
     // Remove from axios headers
     delete api.defaults.headers.common['Authorization'];
   };
@@ -94,12 +94,12 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (userData) => {
     try {
       const response = await api.patch(`/users/${user.id}`, userData);
-      
+
       // Update stored user data
       const updatedUser = { ...user, ...response.data };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      
+
       return { success: true, user: updatedUser };
     } catch (error) {
       return {

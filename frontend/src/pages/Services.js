@@ -30,17 +30,17 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import api from '../utils/axios';
+import api from '../api'
 
 const Services = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Table pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
+
   // Dialog states
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState('create'); // create, edit
@@ -55,7 +55,7 @@ const Services = () => {
   });
   const [formError, setFormError] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
-  
+
   useEffect(() => {
     fetchServices();
   }, []);
@@ -73,11 +73,11 @@ const Services = () => {
       setLoading(false);
     }
   };
-  
+
   // Dialog handlers
   const handleOpenDialog = (mode, service = null) => {
     setDialogMode(mode);
-    
+
     if (mode === 'edit' && service) {
       setSelectedService(service);
       setFormData({
@@ -97,39 +97,39 @@ const Services = () => {
         isActive: true
       });
     }
-    
+
     setFormError('');
     setOpenDialog(true);
   };
-  
+
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setFormError('');
   };
-  
+
   const handleOpenDeleteDialog = (service) => {
     setSelectedService(service);
     setDeleteDialog(true);
   };
-  
+
   const handleCloseDeleteDialog = () => {
     setDeleteDialog(false);
   };
-  
+
   // Form handlers
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
-  
+
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     setFormSubmitting(true);
     setFormError('');
-    
+
     try {
       const dataToSubmit = {
         ...formData,
@@ -142,7 +142,7 @@ const Services = () => {
       } else {
         await api.patch(`/services/${selectedService.id}`, dataToSubmit);
       }
-      
+
       handleCloseDialog();
       fetchServices();
     } catch (err) {
@@ -152,7 +152,7 @@ const Services = () => {
       setFormSubmitting(false);
     }
   };
-  
+
   const handleDeleteService = async () => {
     try {
       await api.delete(`/services/${selectedService.id}`);
@@ -163,40 +163,40 @@ const Services = () => {
       setError('Failed to delete service. Please try again.');
     }
   };
-  
+
   // Pagination
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-  
+
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  
+
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - services.length) : 0;
-  
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
           Services
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog('create')}
         >
           Add Service
         </Button>
       </Box>
-      
+
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
-      
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress />
@@ -223,19 +223,19 @@ const Services = () => {
                       <TableRow key={service.id}>
                         <TableCell>{service.name}</TableCell>
                         <TableCell>
-                          {service.description.length > 60 ? 
-                            `${service.description.substring(0, 60)}...` : 
+                          {service.description.length > 60 ?
+                            `${service.description.substring(0, 60)}...` :
                             service.description}
                         </TableCell>
                         <TableCell>
-                          ${typeof service.price === 'number' 
-                            ? service.price.toFixed(2) 
+                          ${typeof service.price === 'number'
+                            ? service.price.toFixed(2)
                             : parseFloat(service.price).toFixed(2)}
                         </TableCell>
                         <TableCell>{service.estimatedTime} minutes</TableCell>
                         <TableCell>
                           <Box
-                            sx={{ 
+                            sx={{
                               bgcolor: service.isActive ? 'success.main' : 'text.disabled',
                               color: 'white',
                               py: 0.5,
@@ -264,7 +264,7 @@ const Services = () => {
                     </TableCell>
                   </TableRow>
                 )}
-                
+
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 53 * emptyRows }}>
                     <TableCell colSpan={6} />
@@ -273,7 +273,7 @@ const Services = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          
+
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
@@ -285,7 +285,7 @@ const Services = () => {
           />
         </Card>
       )}
-      
+
       {/* Create/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>{dialogMode === 'create' ? 'Add New Service' : 'Edit Service'}</DialogTitle>
@@ -354,8 +354,8 @@ const Services = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button 
-            onClick={handleSubmitForm} 
+          <Button
+            onClick={handleSubmitForm}
             variant="contained"
             disabled={formSubmitting}
           >
@@ -363,13 +363,13 @@ const Services = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete the service "{selectedService?.name}"? 
+            Are you sure you want to delete the service "{selectedService?.name}"?
             This action cannot be undone.
           </Typography>
         </DialogContent>

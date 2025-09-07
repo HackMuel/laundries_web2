@@ -46,7 +46,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Receipt as ReceiptIcon
 } from '@mui/icons-material';
-import api from '../utils/api';
+import api from '../api'
 import { format } from 'date-fns';
 import { Customer, Service, Order, OrderItem, OrderStatus } from '../types';
 

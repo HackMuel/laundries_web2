@@ -45,7 +45,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Receipt as ReceiptIcon
 } from '@mui/icons-material';
-import api from '../utils/axios';
+import api from '../api'
 import { format } from 'date-fns';
 
 const Orders = () => {
@@ -54,12 +54,12 @@ const Orders = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Table pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [statusFilter, setStatusFilter] = useState('');
-  
+
   // Dialog states
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState('create');
@@ -68,7 +68,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [formError, setFormError] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
-  
+
   // New order form
   const [formData, setFormData] = useState({
     customerId: '',
@@ -79,20 +79,20 @@ const Orders = () => {
     deliveryDate: '',
     status: 'pending'
   });
-  
+
   // Order item form
   const [currentItem, setCurrentItem] = useState({
     serviceId: '',
     quantity: 1
   });
-  
+
   const orderStatusSteps = {
     'pending': 0,
     'processing': 1,
     'completed': 2,
     'delivered': 3
   };
-  
+
   const statusColors = {
     'pending': '#FF9800',
     'processing': '#2196F3',
@@ -142,11 +142,11 @@ const Orders = () => {
       console.error('Error fetching services:', err);
     }
   };
-  
+
   // Dialog handlers
   const handleOpenDialog = (mode, order = null) => {
     setDialogMode(mode);
-    
+
     if (mode === 'edit' && order) {
       setSelectedOrder(order);
       setFormData({
@@ -173,43 +173,43 @@ const Orders = () => {
         status: 'pending'
       });
     }
-    
+
     setFormError('');
     setOpenDialog(true);
   };
-  
+
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setFormError('');
   };
-  
+
   const handleOpenDeleteDialog = (order) => {
     setSelectedOrder(order);
     setDeleteDialog(true);
   };
-  
+
   const handleCloseDeleteDialog = () => {
     setDeleteDialog(false);
   };
-  
+
   const handleOpenViewDialog = (order) => {
     setSelectedOrder(order);
     setViewDialog(true);
   };
-  
+
   const handleCloseViewDialog = () => {
     setViewDialog(false);
   };
-  
+
   // Form handlers
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
-  
+
   const handleItemInputChange = (e) => {
     const { name, value } = e.target;
     setCurrentItem(prev => ({
@@ -217,46 +217,46 @@ const Orders = () => {
       [name]: name === 'quantity' ? Math.max(1, parseInt(value) || 1) : value
     }));
   };
-  
+
   const handleAddItem = () => {
     if (!currentItem.serviceId) {
       return;
     }
-    
+
     setFormData(prev => ({
       ...prev,
       items: [...prev.items, { ...currentItem }]
     }));
-    
+
     // Reset current item
     setCurrentItem({
       serviceId: '',
       quantity: 1
     });
   };
-  
+
   const handleRemoveItem = (index) => {
     setFormData(prev => ({
       ...prev,
       items: prev.items.filter((_, i) => i !== index)
     }));
   };
-  
+
   const handleSubmitForm = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.customerId || formData.items.length === 0) {
       setFormError('Please select a customer and add at least one service.');
       return;
     }
-    
+
     setFormSubmitting(true);
     setFormError('');
-    
+
     try {
       // Log the data being sent to API
       console.log('Sending order data:', JSON.stringify(formData, null, 2));
-      
+
       if (dialogMode === 'create') {
         const response = await api.post('/orders', formData);
         console.log('Order created response:', response.data);
@@ -264,25 +264,25 @@ const Orders = () => {
         const response = await api.patch(`/orders/${selectedOrder.id}`, formData);
         console.log('Order updated response:', response.data);
       }
-      
+
       handleCloseDialog();
       fetchOrders(statusFilter);
     } catch (err) {
       console.error('Error submitting form:', err);
       console.error('Error response data:', err.response?.data);
       console.error('Error response status:', err.response?.status);
-      
+
       // Try to extract more details if available
       if (err.response?.data?.error) {
         console.error('Detailed error:', err.response.data.error);
       }
-      
+
       setFormError(err.response?.data?.message || 'An error occurred. Please try again.');
     } finally {
       setFormSubmitting(false);
     }
   };
-  
+
   const handleDeleteOrder = async () => {
     try {
       await api.delete(`/orders/${selectedOrder.id}`);
@@ -293,24 +293,24 @@ const Orders = () => {
       setError('Failed to delete order. Please try again.');
     }
   };
-  
+
   // Status filter & pagination
   const handleStatusFilterChange = (event) => {
     setStatusFilter(event.target.value);
     setPage(0);
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-  
+
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  
+
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - orders.length) : 0;
-  
+
   // Helper functions
   const getServiceNameById = (serviceId) => {
     const service = services.find(s => s.id === serviceId);
@@ -343,22 +343,22 @@ const Orders = () => {
     const customer = customers.find(c => c.id === customerId);
     return customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown Customer';
   };
-  
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
           Orders
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog('create')}
         >
           New Order
         </Button>
       </Box>
-      
+
       <Card sx={{ mb: 4 }}>
         <CardContent sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <FormControl sx={{ minWidth: 200 }}>
@@ -380,13 +380,13 @@ const Orders = () => {
           </FormControl>
         </CardContent>
       </Card>
-      
+
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
-      
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress />
@@ -417,19 +417,19 @@ const Orders = () => {
                         <TableCell>{format(new Date(order.createdAt), 'MMM dd, yyyy')}</TableCell>
                         <TableCell>${formatPrice(order.totalAmount)}</TableCell>
                         <TableCell>
-                          <Chip 
-                            label={order.status.charAt(0).toUpperCase() + order.status.slice(1)} 
-                            sx={{ 
-                              bgcolor: statusColors[order.status], 
+                          <Chip
+                            label={order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            sx={{
+                              bgcolor: statusColors[order.status],
                               color: 'white',
                               fontWeight: 'bold'
-                            }} 
+                            }}
                           />
                         </TableCell>
                         <TableCell>
-                          <Chip 
-                            label={order.isPaid ? 'Paid' : 'Unpaid'} 
-                            color={order.isPaid ? 'success' : 'default'} 
+                          <Chip
+                            label={order.isPaid ? 'Paid' : 'Unpaid'}
+                            color={order.isPaid ? 'success' : 'default'}
                             variant="outlined"
                             size="small"
                           />
@@ -454,7 +454,7 @@ const Orders = () => {
                     </TableCell>
                   </TableRow>
                 )}
-                
+
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 53 * emptyRows }}>
                     <TableCell colSpan={7} />
@@ -463,7 +463,7 @@ const Orders = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          
+
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
@@ -475,7 +475,7 @@ const Orders = () => {
           />
         </Card>
       )}
-      
+
       {/* Create/Edit Order Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
         <DialogTitle>
@@ -487,7 +487,7 @@ const Orders = () => {
               {formError}
             </Alert>
           )}
-          
+
           <Grid container spacing={3} sx={{ mt: 0.5 }}>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
@@ -508,7 +508,7 @@ const Orders = () => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -522,7 +522,7 @@ const Orders = () => {
                 }}
               />
             </Grid>
-            
+
             {dialogMode === 'edit' && (
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
@@ -544,7 +544,7 @@ const Orders = () => {
                 </FormControl>
               </Grid>
             )}
-            
+
             <Grid item xs={12} md={dialogMode === 'edit' ? 6 : 12}>
               <FormControl fullWidth>
                 <InputLabel id="payment-method-label">Payment Method</InputLabel>
@@ -565,7 +565,7 @@ const Orders = () => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12}>
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -604,9 +604,9 @@ const Orders = () => {
                       />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Button 
-                        fullWidth 
-                        variant="contained" 
+                      <Button
+                        fullWidth
+                        variant="contained"
                         color="secondary"
                         onClick={handleAddItem}
                         disabled={!currentItem.serviceId}
@@ -615,7 +615,7 @@ const Orders = () => {
                       </Button>
                     </Grid>
                   </Grid>
-                  
+
                   {formData.items.length > 0 ? (
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -654,7 +654,7 @@ const Orders = () => {
                 </AccordionDetails>
               </Accordion>
             </Grid>
-            
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -666,7 +666,7 @@ const Orders = () => {
                 onChange={handleInputChange}
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <FormControlLabel
                 control={
@@ -683,8 +683,8 @@ const Orders = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button 
-            onClick={handleSubmitForm} 
+          <Button
+            onClick={handleSubmitForm}
             variant="contained"
             disabled={formSubmitting}
           >
@@ -692,7 +692,7 @@ const Orders = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Order Details Dialog */}
       <Dialog open={viewDialog} onClose={handleCloseViewDialog} maxWidth="md" fullWidth>
         {selectedOrder && (
@@ -702,13 +702,13 @@ const Orders = () => {
                 <Typography variant="h6">
                   Order #{selectedOrder.orderNumber}
                 </Typography>
-                <Chip 
-                  label={selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)} 
-                  sx={{ 
-                    bgcolor: statusColors[selectedOrder.status], 
+                <Chip
+                  label={selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                  sx={{
+                    bgcolor: statusColors[selectedOrder.status],
                     color: 'white',
                     fontWeight: 'bold'
-                  }} 
+                  }}
                 />
               </Box>
             </DialogTitle>
@@ -756,7 +756,7 @@ const Orders = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Card variant="outlined" sx={{ height: '100%' }}>
                     <CardContent>
@@ -784,9 +784,9 @@ const Orders = () => {
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                           <Typography variant="body2" color="text.secondary">Payment Status:</Typography>
-                          <Chip 
-                            label={selectedOrder.isPaid ? 'Paid' : 'Unpaid'} 
-                            color={selectedOrder.isPaid ? 'success' : 'default'} 
+                          <Chip
+                            label={selectedOrder.isPaid ? 'Paid' : 'Unpaid'}
+                            color={selectedOrder.isPaid ? 'success' : 'default'}
                             variant="outlined"
                             size="small"
                           />
@@ -803,7 +803,7 @@ const Orders = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-                
+
                 <Grid item xs={12}>
                   <Card variant="outlined">
                     <CardContent>
@@ -832,9 +832,9 @@ const Orders = () => {
                           </TableBody>
                         </Table>
                       </TableContainer>
-                      
+
                       <Divider sx={{ my: 2 }} />
-                      
+
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Typography variant="h6">
                           Total: ${formatPrice(selectedOrder?.totalAmount)}
@@ -843,7 +843,7 @@ const Orders = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-                
+
                 {selectedOrder.note && (
                   <Grid item xs={12}>
                     <Card variant="outlined">
@@ -876,13 +876,13 @@ const Orders = () => {
           </>
         )}
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete order #{selectedOrder?.orderNumber}? 
+            Are you sure you want to delete order #{selectedOrder?.orderNumber}?
             This action cannot be undone.
           </Typography>
         </DialogContent>
@@ -905,10 +905,10 @@ const List = ({ children, disablePadding }) => (
 );
 
 const ListItem = ({ children, divider }) => (
-  <Box sx={{ 
-    py: 1.5, 
-    px: 2, 
-    borderBottom: divider ? '1px solid rgba(0, 0, 0, 0.12)' : 'none' 
+  <Box sx={{
+    py: 1.5,
+    px: 2,
+    borderBottom: divider ? '1px solid rgba(0, 0, 0, 0.12)' : 'none'
   }}>
     {children}
   </Box>
