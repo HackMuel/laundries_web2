@@ -1,36 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Grid, 
-  Typography, 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import {
+  Box,
+  Grid,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
   CircularProgress,
   useTheme
 } from '@mui/material';
-import { 
-  PeopleAlt as CustomersIcon, 
+import {
+  PeopleAlt as CustomersIcon,
   LocalLaundryService as OrdersIcon,
-  AttachMoney as RevenueIcon, 
-  Pending as PendingIcon 
+  AttachMoney as RevenueIcon,
+  Pending as PendingIcon
 } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import api from '../api';
+import apiClient from '../api';
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const DashboardCard = ({ title, value, icon, color }) => {
   const theme = useTheme();
-  
+
   return (
     <Card sx={{ height: '100%' }}>
       <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" color="textSecondary">{title}</Typography>
-          <Box sx={{ 
+          <Box sx={{
             backgroundColor: `${color}20`, // 20% opacity
             borderRadius: '50%',
             width: 48,
@@ -68,8 +68,8 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/dashboard');
-        
+        const response = await apiClient.get('/api/dashboard-data');
+
         setStats({
           totalCustomers: response.data.totalCustomers,
           totalOrders: response.data.totalOrders,
@@ -181,42 +181,42 @@ const Dashboard = () => {
       <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
         Dashboard
       </Typography>
-      
+
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard 
-            title="Total Customers" 
-            value={stats.totalCustomers} 
+          <DashboardCard
+            title="Total Customers"
+            value={stats.totalCustomers}
             icon={<CustomersIcon />}
             color={theme.palette.primary.main}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard 
-            title="Total Orders" 
-            value={stats.totalOrders} 
+          <DashboardCard
+            title="Total Orders"
+            value={stats.totalOrders}
             icon={<OrdersIcon />}
             color={theme.palette.secondary.main}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard 
-            title="Total Revenue" 
-            value={`$${stats.totalRevenue.toLocaleString()}`} 
+          <DashboardCard
+            title="Total Revenue"
+            value={`$${stats.totalRevenue.toLocaleString()}`}
             icon={<RevenueIcon />}
             color="#4CAF50"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard 
-            title="Pending Orders" 
-            value={stats.pendingOrders} 
+          <DashboardCard
+            title="Pending Orders"
+            value={stats.pendingOrders}
             icon={<PendingIcon />}
             color="#FF9800"
           />
         </Grid>
       </Grid>
-      
+
       <Card sx={{ height: '400px' }}>
         <CardHeader title="Revenue & Orders Overview" />
         <CardContent sx={{ height: 'calc(100% - 70px)' }}>
