@@ -30,7 +30,7 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon
 } from '@mui/icons-material';
-import api from '../utils/axios';
+import api from '../api';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);

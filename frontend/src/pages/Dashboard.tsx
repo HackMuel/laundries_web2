@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Grid, 
-  Typography, 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import {
+  Box,
+  Grid,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
   CircularProgress,
   useTheme
 } from '@mui/material';
-import { 
-  PeopleAlt as CustomersIcon, 
+import {
+  PeopleAlt as CustomersIcon,
   LocalLaundryService as OrdersIcon,
-  AttachMoney as RevenueIcon, 
-  Pending as PendingIcon 
+  AttachMoney as RevenueIcon,
+  Pending as PendingIcon
 } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import axios from '../utils/axios';
+import axios from '../utils/api';
 
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -50,7 +50,7 @@ interface DashboardStats {
 
 const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, icon, color }) => {
   const theme = useTheme();
-  
+
   return (
     <Card sx={{ height: '100%' }}>
       <CardHeader
@@ -110,7 +110,7 @@ const Dashboard: React.FC = () => {
       <Typography variant="h4" component="h1" sx={{ mb: 4, fontWeight: 'bold' }}>
         Dashboard
       </Typography>
-      
+
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <DashboardCard
@@ -145,7 +145,7 @@ const Dashboard: React.FC = () => {
           />
         </Grid>
       </Grid>
-      
+
       <Card sx={{ mb: 4, p: 2 }}>
         <Typography variant="h6" sx={{ mb: 2, px: 1 }}>
           Ikhtisar Pendapatan & Pesanan

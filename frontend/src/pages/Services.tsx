@@ -30,7 +30,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import api from '../utils/axios';
+import api from '../utils/api';
 import { Service } from '../types';
 
 interface FormData {
@@ -61,11 +61,11 @@ const Services: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  
+
   // Table pagination
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  
+
   // Dialog states
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
@@ -80,7 +80,7 @@ const Services: React.FC = () => {
   });
   const [formError, setFormError] = useState<string>('');
   const [formSubmitting, setFormSubmitting] = useState<boolean>(false);
-  
+
   const fetchServices = async () => {
     setLoading(true);
     try {
@@ -188,8 +188,8 @@ const Services: React.FC = () => {
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
           Layanan
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog('create')}
         >
@@ -220,17 +220,17 @@ const Services: React.FC = () => {
                     <TableRow key={service.id}>
                       <TableCell>{service.name}</TableCell>
                       <TableCell>
-                        {service.description.length > 60 ? 
-                          `${service.description.substring(0, 60)}...` : 
+                        {service.description.length > 60 ?
+                          `${service.description.substring(0, 60)}...` :
                           service.description}
                       </TableCell>
-                      <TableCell>Rp{typeof service.price === 'number' 
-                        ? service.price.toFixed(2) 
+                      <TableCell>Rp{typeof service.price === 'number'
+                        ? service.price.toFixed(2)
                         : parseFloat(String(service.price)).toFixed(2)}</TableCell>
                       <TableCell>{service.estimatedTime} menit</TableCell>
                       <TableCell>
                         <Box
-                          sx={{ 
+                          sx={{
                             bgcolor: service.isActive ? 'success.main' : 'text.disabled',
                             color: 'white',
                             py: 0.5,
@@ -329,8 +329,8 @@ const Services: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Batal</Button>
-          <Button 
-            onClick={handleSubmitForm} 
+          <Button
+            onClick={handleSubmitForm}
             variant="contained"
             disabled={formSubmitting}
           >
@@ -342,7 +342,7 @@ const Services: React.FC = () => {
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
           <Typography>
-            Apakah Anda yakin ingin menghapus layanan "{selectedService?.name}"? 
+            Apakah Anda yakin ingin menghapus layanan "{selectedService?.name}"?
             Tindakan ini tidak dapat dibatalkan.
           </Typography>
         </DialogContent>

@@ -36,7 +36,7 @@ import {
   Stack,
   Divider,
   SelectChangeEvent,
-  FormControlLabel, 
+  FormControlLabel,
   Switch
 } from '@mui/material';
 import {
@@ -46,7 +46,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Receipt as ReceiptIcon
 } from '@mui/icons-material';
-import api from '../utils/axios';
+import api from '../utils/api';
 import { format } from 'date-fns';
 import { Customer, Service, Order, OrderItem, OrderStatus } from '../types';
 
@@ -87,12 +87,12 @@ const Orders: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  
+
   // Table pagination
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [statusFilter, setStatusFilter] = useState<string>('');
-  
+
   // Dialog states
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
@@ -101,7 +101,7 @@ const Orders: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [formError, setFormError] = useState<string>('');
   const [formSubmitting, setFormSubmitting] = useState<boolean>(false);
-  
+
   // New order form
   const [formData, setFormData] = useState<FormData>({
     customerId: '',
@@ -112,20 +112,20 @@ const Orders: React.FC = () => {
     deliveryDate: '',
     status: 'pending'
   });
-  
+
   // Order item form
   const [currentItem, setCurrentItem] = useState<CurrentItem>({
     serviceId: '',
     quantity: 1
   });
-  
+
   const orderStatusSteps = {
     'pending': 0,
     'processing': 1,
     'completed': 2,
     'delivered': 3
   };
-  
+
   const statusColors = {
     'pending': '#FF9800',
     'processing': '#2196F3',
@@ -133,7 +133,7 @@ const Orders: React.FC = () => {
     'delivered': '#9C27B0',
     'cancelled': '#F44336'
   };
-  
+
   const statusNames = {
     'pending': 'Tertunda',
     'processing': 'Diproses',
@@ -216,7 +216,7 @@ const Orders: React.FC = () => {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, deliveryDate: e.target.value }));
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent) => {
     const { name, value, type } = e.target as HTMLInputElement;
     setFormData(prev => ({
@@ -237,14 +237,14 @@ const Orders: React.FC = () => {
     }
 
     setFormSubmitting(true);
-    
+
     try {
       if (dialogMode === 'create') {
         await api.post('/orders', formData);
       } else if (selectedOrder) {
         await api.patch(`/orders/${selectedOrder.id}`, formData);
       }
-      
+
       setOpenDialog(false);
       fetchOrders(statusFilter);
     } catch (err: any) {
@@ -260,15 +260,15 @@ const Orders: React.FC = () => {
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
           Pesanan
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setOpenDialog(true)}
         >
           Pesanan Baru
         </Button>
       </Box>
-      
+
       <Card sx={{ mb: 4 }}>
         <CardContent sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <FormControl sx={{ minWidth: 200 }}>
@@ -290,7 +290,7 @@ const Orders: React.FC = () => {
           </FormControl>
         </CardContent>
       </Card>
-      
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
@@ -322,19 +322,19 @@ const Orders: React.FC = () => {
                       <TableCell>{format(new Date(order.createdAt), 'dd/MM/yyyy')}</TableCell>
                       <TableCell>Rp{formatPrice(order.totalAmount)}</TableCell>
                       <TableCell>
-                        <Chip 
-                          label={statusLabels[order.status] || order.status} 
-                          sx={{ 
+                        <Chip
+                          label={statusLabels[order.status] || order.status}
+                          sx={{
                             bgcolor: statusColors[order.status as keyof typeof statusColors] || '#999',
                             color: 'white',
                             fontWeight: 'bold'
-                          }} 
+                          }}
                         />
                       </TableCell>
                       <TableCell>
-                        <Chip 
-                          label={order.isPaid ? 'Dibayar' : 'Belum Dibayar'} 
-                          color={order.isPaid ? 'success' : 'default'} 
+                        <Chip
+                          label={order.isPaid ? 'Dibayar' : 'Belum Dibayar'}
+                          color={order.isPaid ? 'success' : 'default'}
                           variant="outlined"
                           size="small"
                         />
@@ -358,7 +358,7 @@ const Orders: React.FC = () => {
               )}
             </TableBody>
           </Table>
-          
+
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
@@ -373,7 +373,7 @@ const Orders: React.FC = () => {
           />
         </TableContainer>
       )}
-      
+
       {/* Create/Edit Order Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
         <DialogTitle>
@@ -385,7 +385,7 @@ const Orders: React.FC = () => {
               {formError}
             </Alert>
           )}
-          
+
           <Grid container spacing={3} sx={{ mt: 0.5 }}>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
@@ -406,7 +406,7 @@ const Orders: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -420,7 +420,7 @@ const Orders: React.FC = () => {
                 }}
               />
             </Grid>
-            
+
             {dialogMode === 'edit' && (
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
@@ -442,7 +442,7 @@ const Orders: React.FC = () => {
                 </FormControl>
               </Grid>
             )}
-            
+
             <Grid item xs={12} md={dialogMode === 'edit' ? 6 : 12}>
               <FormControl fullWidth>
                 <InputLabel id="payment-method-label">Metode Pembayaran</InputLabel>
@@ -463,7 +463,7 @@ const Orders: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -477,7 +477,7 @@ const Orders: React.FC = () => {
                 }}
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <FormControlLabel
                 control={
@@ -492,11 +492,11 @@ const Orders: React.FC = () => {
             </Grid>
           </Grid>
         </DialogContent>
-        
+
         <DialogActions>
           <Button onClick={handleCloseDialog}>Batal</Button>
-          <Button 
-            onClick={handleSubmitForm} 
+          <Button
+            onClick={handleSubmitForm}
             variant="contained"
             disabled={formSubmitting}
           >
@@ -504,7 +504,7 @@ const Orders: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Order Details Dialog */}
       <Dialog open={viewDialog} onClose={() => setViewDialog(false)} maxWidth="md" fullWidth>
         {selectedOrder && (
@@ -514,17 +514,17 @@ const Orders: React.FC = () => {
                 <Typography variant="h6">
                   Pesanan #{selectedOrder.orderNumber}
                 </Typography>
-                <Chip 
-                  label={statusNames[selectedOrder.status as keyof typeof statusNames] || selectedOrder.status} 
-                  sx={{ 
-                    bgcolor: statusColors[selectedOrder.status as keyof typeof statusColors] || '#999', 
+                <Chip
+                  label={statusNames[selectedOrder.status as keyof typeof statusNames] || selectedOrder.status}
+                  sx={{
+                    bgcolor: statusColors[selectedOrder.status as keyof typeof statusColors] || '#999',
                     color: 'white',
                     fontWeight: 'bold'
-                  }} 
+                  }}
                 />
               </Box>
             </DialogTitle>
-            
+
             <DialogContent>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
@@ -542,7 +542,7 @@ const Orders: React.FC = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-                
+
                 <Grid item xs={12} md={6}>
                   <Card variant="outlined" sx={{ height: '100%' }}>
                     <CardContent>
@@ -570,9 +570,9 @@ const Orders: React.FC = () => {
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                           <Typography variant="body2" color="text.secondary">Status Pembayaran:</Typography>
-                          <Chip 
-                            label={selectedOrder.isPaid ? 'Dibayar' : 'Belum Dibayar'} 
-                            color={selectedOrder.isPaid ? 'success' : 'default'} 
+                          <Chip
+                            label={selectedOrder.isPaid ? 'Dibayar' : 'Belum Dibayar'}
+                            color={selectedOrder.isPaid ? 'success' : 'default'}
                             variant="outlined"
                             size="small"
                           />
@@ -581,7 +581,7 @@ const Orders: React.FC = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-                
+
                 <Grid item xs={12}>
                   <Card variant="outlined">
                     <CardContent>
@@ -610,9 +610,9 @@ const Orders: React.FC = () => {
                           </TableBody>
                         </Table>
                       </TableContainer>
-                      
+
                       <Divider sx={{ my: 2 }} />
-                      
+
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Typography variant="h6">
                           Total: Rp{formatPrice(selectedOrder.totalAmount)}
@@ -621,7 +621,7 @@ const Orders: React.FC = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-                
+
                 {selectedOrder.note && (
                   <Grid item xs={12}>
                     <Card variant="outlined">
@@ -638,7 +638,7 @@ const Orders: React.FC = () => {
                 )}
               </Grid>
             </DialogContent>
-            
+
             <DialogActions>
               <Button onClick={() => setViewDialog(false)}>Tutup</Button>
               <Button
@@ -665,13 +665,13 @@ const Orders: React.FC = () => {
           </>
         )}
       </Dialog>
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
           <Typography>
-            Apakah Anda yakin ingin menghapus pesanan #{selectedOrder?.orderNumber}? 
+            Apakah Anda yakin ingin menghapus pesanan #{selectedOrder?.orderNumber}?
             Tindakan ini tidak dapat dibatalkan.
           </Typography>
         </DialogContent>

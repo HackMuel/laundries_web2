@@ -30,7 +30,7 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon
 } from '@mui/icons-material';
-import api from '../utils/axios';
+import api from '../utils/api';
 import { Customer } from '../types';
 
 interface FormData {
@@ -46,11 +46,11 @@ const Customers: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  
+
   // Table pagination
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  
+
   // Dialog states
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
@@ -65,7 +65,7 @@ const Customers: React.FC = () => {
   });
   const [formError, setFormError] = useState<string>('');
   const [formSubmitting, setFormSubmitting] = useState<boolean>(false);
-  
+
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
@@ -177,15 +177,15 @@ const Customers: React.FC = () => {
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
           Pelanggan
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenDialog('create')}
         >
           Tambah Pelanggan
         </Button>
       </Box>
-      
+
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Box component="form" onSubmit={handleSearchSubmit} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -203,9 +203,9 @@ const Customers: React.FC = () => {
                 ),
               }}
             />
-            <Button 
-              type="submit" 
-              variant="contained" 
+            <Button
+              type="submit"
+              variant="contained"
               sx={{ ml: 2, height: 56 }}
             >
               Cari
@@ -213,7 +213,7 @@ const Customers: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
-      
+
       {loading ? (
         <CircularProgress />
       ) : error ? (
@@ -324,8 +324,8 @@ const Customers: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Batal</Button>
-          <Button 
-            onClick={handleFormSubmit} 
+          <Button
+            onClick={handleFormSubmit}
             variant="contained"
             disabled={formSubmitting}
           >
@@ -338,7 +338,7 @@ const Customers: React.FC = () => {
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Apakah Anda yakin ingin menghapus {selectedCustomer?.firstName} {selectedCustomer?.lastName}? 
+            Apakah Anda yakin ingin menghapus {selectedCustomer?.firstName} {selectedCustomer?.lastName}?
             Tindakan ini tidak dapat dibatalkan.
           </DialogContentText>
         </DialogContent>

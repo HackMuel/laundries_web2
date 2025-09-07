@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import api from '../utils/axios';
+import api from '../utils/api';
 import { User, AuthState, RegisterData } from '../types';
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -25,13 +25,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
       api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
     }
-    
+
     setLoading(false);
   }, []);
 
@@ -40,18 +40,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { accessToken, user } = response.data;
-      
+
       // Set token in axios headers
       api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      
+
       // Save in localStorage
       localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       // Update state
       setToken(accessToken);
       setUser(user);
-      
+
       return { success: true };
     } catch (error: any) {
       return {
@@ -66,18 +66,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.post('/auth/register', userData);
       const { accessToken, user } = response.data;
-      
+
       // Set token in axios headers
       api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      
+
       // Save in localStorage
       localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       // Update state
       setToken(accessToken);
       setUser(user);
-      
+
       return { success: true };
     } catch (error: any) {
       return {
@@ -92,11 +92,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Remove from localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
+
     // Reset state
     setToken(null);
     setUser(null);
-    
+
     // Remove from axios headers
     delete api.defaults.headers.common['Authorization'];
   };
@@ -109,12 +109,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const response = await api.patch(`/users/${user.id}`, userData);
-      
+
       // Update stored user data
       const updatedUser = { ...user, ...response.data };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      
+
       return { success: true, user: updatedUser };
     } catch (error: any) {
       return {
