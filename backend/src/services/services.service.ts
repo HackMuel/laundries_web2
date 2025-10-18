@@ -17,7 +17,7 @@ export class ServicesService {
     return this.servicesRepository.save(service);
   }
 
-  async findAll(activeOnly: boolean = false): Promise<Service[]> {
+  async findAll(activeOnly = false): Promise<Service[]> {
     if (activeOnly) {
       return this.servicesRepository.find({ where: { isActive: true } });
     }

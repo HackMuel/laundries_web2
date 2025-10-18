@@ -4,7 +4,6 @@ import {
   Typography,
   Button,
   Card,
-  CardContent,
   TextField,
   Dialog,
   DialogActions,
@@ -30,7 +29,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import api from '../api'
+import api from '../api';
 
 const Services = () => {
   const [services, setServices] = useState([]);

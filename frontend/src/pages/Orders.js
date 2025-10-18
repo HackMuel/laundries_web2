@@ -339,11 +339,6 @@ const Orders = () => {
     }, 0);
   };
 
-  const getCustomerNameById = (customerId) => {
-    const customer = customers.find(c => c.id === customerId);
-    return customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown Customer';
-  };
-
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

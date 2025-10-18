@@ -36,7 +36,7 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     // Remove password before returning
-    const { password, ...result } = user;
+    const { password: _password, ...result } = user;
     return result;
   }
 

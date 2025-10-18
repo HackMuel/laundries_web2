@@ -23,8 +23,6 @@ import apiClient from '../api';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const DashboardCard = ({ title, value, icon, color }) => {
-  const theme = useTheme();
-
   return (
     <Card sx={{ height: '100%' }}>
       <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

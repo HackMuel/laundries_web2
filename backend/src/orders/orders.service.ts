@@ -129,7 +129,7 @@ export class OrdersService {
     }
 
     // Save order first to ensure we have the ID
-    const savedOrder = await this.ordersRepository.save(order);
+    await this.ordersRepository.save(order);
 
     // Handle order items if provided
     if (updateOrderDto.items && updateOrderDto.items.length > 0) {
@@ -216,7 +216,7 @@ export class OrdersService {
     return result.total ? parseFloat(result.total) : 0;
   }
 
-  async getRevenueData(months: number = 6): Promise<any> {
+  async getRevenueData(months = 6): Promise<any> {
     const today = new Date();
     const labels = [];
     const revenue = [];

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -57,14 +57,11 @@ const Customers = () => {
   const [formError, setFormError] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
   
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async (searchValue = '') => {
     try {
       setLoading(true);
-      const response = await api.get(`/customers${searchTerm ? `?search=${searchTerm}` : ''}`);
+      const query = searchValue ? `?search=${searchValue}` : '';
+      const response = await api.get(`/customers${query}`);
       setCustomers(response.data);
       setError('');
     } catch (err) {
@@ -73,7 +70,11 @@ const Customers = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
   
   // Dialog handlers
   const handleOpenDialog = (mode, customer = null) => {
@@ -136,7 +137,7 @@ const Customers = () => {
       }
       
       handleCloseDialog();
-      fetchCustomers();
+      fetchCustomers(searchTerm);
     } catch (err) {
       console.error('Error submitting form:', err);
       setFormError(err.response?.data?.message || 'An error occurred. Please try again.');
@@ -149,7 +150,7 @@ const Customers = () => {
     try {
       await api.delete(`/customers/${selectedCustomer.id}`);
       handleCloseDeleteDialog();
-      fetchCustomers();
+      fetchCustomers(searchTerm);
     } catch (err) {
       console.error('Error deleting customer:', err);
       setError('Failed to delete customer. Please try again.');
@@ -163,7 +164,7 @@ const Customers = () => {
   
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchCustomers();
+    fetchCustomers(searchTerm);
   };
   
   const handleChangePage = (event, newPage) => {
